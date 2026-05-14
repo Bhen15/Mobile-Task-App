@@ -7,12 +7,12 @@ export default function AddTaskScreen() {
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('pending');
 
-  async function handleSave() {
+  function handleSave() {
     if (!title.trim()) {
       Alert.alert('Please enter a task title.');
       return;
     }
-    await addTask(title.trim(), description.trim(), status);
+    addTask(title.trim(), description.trim(), status);
     setTitle('');
     setDescription('');
     setStatus('pending');
@@ -71,8 +71,6 @@ const styles = StyleSheet.create({
   statusActive: { backgroundColor: '#4A6CF7', borderColor: '#4A6CF7' },
   statusText: { color: '#333', fontSize: 14 },
   statusTextActive: { color: 'white' },
-  saveBtn: {
-    backgroundColor: '#1a1a2e', padding: 16, borderRadius: 12, alignItems: 'center',
-  },
+  saveBtn: { backgroundColor: '#1a1a2e', padding: 16, borderRadius: 12, alignItems: 'center' },
   saveBtnText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
 });

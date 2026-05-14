@@ -9,16 +9,13 @@ export default function TasksScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      let active = true;
-      getTasks().then((data) => { if (active) setTasks(data); });
-      return () => { active = false; };
+      setTasks(getTasks());
     }, [])
   );
 
-  async function handleDelete(id) {
-    await deleteTask(id);
-    const updated = await getTasks();
-    setTasks(updated);
+  function handleDelete(id) {
+    deleteTask(id);
+    setTasks(getTasks());
   }
 
   const statusColor = (status) => {
@@ -43,7 +40,10 @@ export default function TasksScreen() {
           data={tasks}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
+            >
               <View style={styles.cardInfo}>
                 <Text style={styles.taskTitle}>{item.title}</Text>
                 {item.description ? <Text style={styles.taskDesc}>{item.description}</Text> : null}
@@ -54,7 +54,7 @@ export default function TasksScreen() {
               <TouchableOpacity onPress={() => handleDelete(item.id)}>
                 <Text style={styles.delete}>🗑️</Text>
               </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}
@@ -70,9 +70,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start', marginBottom: 16, paddingHorizontal: 20,
   },
   addBtnText: { color: 'white', fontWeight: 'bold' },
-  emptyBox: {
-    backgroundColor: 'white', borderRadius: 10, padding: 20, alignItems: 'center',
-  },
+  emptyBox: { backgroundColor: 'white', borderRadius: 10, padding: 20, alignItems: 'center' },
   empty: { color: '#999', fontSize: 15 },
   card: {
     backgroundColor: 'white', borderRadius: 10, padding: 14,

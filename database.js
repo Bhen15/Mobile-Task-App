@@ -1,24 +1,33 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SQLite from 'expo-sqlite';
 
-export async function initDB() {
-  const tasks = await AsyncStorage.getItem('tasks');
-  if (!tasks) await AsyncStorage.setItem('tasks', JSON.stringify([]));
+const db = SQLite.openDatabaseSync('tasks.db');
+
+export function initDB() {
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT DEFAULT 'pending'
+    );
+  `);
 }
 
-export async function getTasks() {
-  const tasks = await AsyncStorage.getItem('tasks');
-  return tasks ? JSON.parse(tasks) : [];
+export function getTasks() {
+  return db.getAllSync('SELECT * FROM tasks;');
 }
 
-export async function addTask(title, description, status) {
-  const tasks = await getTasks();
-  const newTask = { id: Date.now(), title, description, status };
-  tasks.push(newTask);
-  await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
+export function getTaskById(id) {
+  return db.getFirstSync('SELECT * FROM tasks WHERE id = ?;', [id]);
 }
 
-export async function deleteTask(id) {
-  const tasks = await getTasks();
-  const updated = tasks.filter((t) => t.id !== id);
-  await AsyncStorage.setItem('tasks', JSON.stringify(updated));
+export function addTask(title, description, status) {
+  db.runSync(
+    'INSERT INTO tasks (title, description, status) VALUES (?, ?, ?);',
+    [title, description, status]
+  );
+}
+
+export function deleteTask(id) {
+  db.runSync('DELETE FROM tasks WHERE id = ?;', [id]);
 }
