@@ -1,17 +1,16 @@
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useState, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getTasks, deleteTask } from '../database';
 
 export default function TasksScreen() {
   const [tasks, setTasks] = useState([]);
+  const navigation = useNavigation();
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      getTasks().then((data) => {
-        if (active) setTasks(data);
-      });
+      getTasks().then((data) => { if (active) setTasks(data); });
       return () => { active = false; };
     }, [])
   );
@@ -22,19 +21,38 @@ export default function TasksScreen() {
     setTasks(updated);
   }
 
+  const statusColor = (status) => {
+    if (status === 'pending') return '#4A6CF7';
+    if (status === 'Ongoing') return '#FFA500';
+    if (status === 'Finished') return '#4CAF50';
+    return '#999';
+  };
+
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>Task List</Text>
+      <TouchableOpacity style={styles.addBtn} onPress={() => navigation.navigate('Add-Task')}>
+        <Text style={styles.addBtnText}>Add Task</Text>
+      </TouchableOpacity>
       {tasks.length === 0 ? (
-        <Text style={styles.empty}>No tasks yet. Add one!</Text>
+        <View style={styles.emptyBox}>
+          <Text style={styles.empty}>No Task Yet</Text>
+        </View>
       ) : (
         <FlatList
           data={tasks}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.item}>
-              <Text style={styles.itemText}>{item.title}</Text>
+            <View style={styles.card}>
+              <View style={styles.cardInfo}>
+                <Text style={styles.taskTitle}>{item.title}</Text>
+                {item.description ? <Text style={styles.taskDesc}>{item.description}</Text> : null}
+                <Text style={[styles.statusBadge, { color: statusColor(item.status) }]}>
+                  ● {item.status}
+                </Text>
+              </View>
               <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                <Text style={styles.delete}>Delete</Text>
+                <Text style={styles.delete}>🗑️</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -45,13 +63,24 @@ export default function TasksScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  empty: { color: 'gray', textAlign: 'center', marginTop: 40 },
-  item: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', padding: 14,
-    borderBottomWidth: 1, borderColor: '#eee',
+  container: { flex: 1, padding: 20, backgroundColor: '#f2f2f2' },
+  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 14, marginTop: 10 },
+  addBtn: {
+    backgroundColor: '#1a1a2e', padding: 10, borderRadius: 8,
+    alignSelf: 'flex-start', marginBottom: 16, paddingHorizontal: 20,
   },
-  itemText: { fontSize: 16, flex: 1 },
-  delete: { color: 'red', fontSize: 14 },
+  addBtnText: { color: 'white', fontWeight: 'bold' },
+  emptyBox: {
+    backgroundColor: 'white', borderRadius: 10, padding: 20, alignItems: 'center',
+  },
+  empty: { color: '#999', fontSize: 15 },
+  card: {
+    backgroundColor: 'white', borderRadius: 10, padding: 14,
+    marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  cardInfo: { flex: 1 },
+  taskTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
+  taskDesc: { fontSize: 13, color: '#666', marginBottom: 4 },
+  statusBadge: { fontSize: 13, fontWeight: '600' },
+  delete: { fontSize: 20, marginLeft: 10 },
 });

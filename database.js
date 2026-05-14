@@ -10,9 +10,9 @@ export async function getTasks() {
   return tasks ? JSON.parse(tasks) : [];
 }
 
-export async function addTask(title) {
+export async function addTask(title, description, status) {
   const tasks = await getTasks();
-  const newTask = { id: Date.now(), title };
+  const newTask = { id: Date.now(), title, description, status };
   tasks.push(newTask);
   await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
 }
