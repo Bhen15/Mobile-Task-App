@@ -17,6 +17,9 @@
       },
       "package": "com.bhen_who.taskapp"
     },
+    "plugins": [
+      "expo-sqlite"
+    ],
     "extra": {
       "eas": {
         "projectId": "61ef2597-7d30-4a5e-ac43-ab713c6e15f8"
